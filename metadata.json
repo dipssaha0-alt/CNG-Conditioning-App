@@ -1,0 +1,5 @@
+{
+  "name": "CNG Condition Monitoring System",
+  "description": "A comprehensive audit and monitoring platform for CNG stations with AI-powered leakage analysis, multi-zone coordination, and real-time tracking.",
+  "requestFramePermissions": ["camera", "geolocation"]
+}

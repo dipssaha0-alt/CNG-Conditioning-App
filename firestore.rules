@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Fields: uid, email, displayName, role, zone, photoURL
+    //
+    // Collection: stations
+    // Fields: id, name, zone, location (lat, lng), lastAuditDate
+    //
+    // Collection: audit_points
+    // Fields: id, stationId, auditorId, category, description, status, remark, photoUrl, createdAt, closedAt, closedBy, isLeakage, leakageType
+    //
+    // Collection: auditor_locations
+    // Fields: auditorId, location (lat, lng), timestamp
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "dipssaha0@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isCoordinator() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coordinator';
+    }
+
+    function isAuditor() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'auditor';
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'role']) &&
+             data.uid is string &&
+             data.email is string &&
+             data.role in ['auditor', 'coordinator', 'admin'];
+    }
+
+    function isValidAuditPoint(data) {
+      return data.keys().hasAll(['id', 'stationId', 'auditorId', 'category', 'description', 'status', 'createdAt']) &&
+             data.id is string &&
+             data.stationId is string &&
+             data.auditorId is string &&
+             data.category in ['technical', 'statutory', 'safety'] &&
+             data.status in ['open', 'closed'] &&
+             data.description is string && data.description.size() < 2000;
+    }
+
+    // ===============================================================
+    // Rules (Public for No-Sign-In Demo)
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    match /stations/{stationId} {
+      allow read, write: if true;
+    }
+
+    match /audit_points/{pointId} {
+      allow read, write: if true;
+    }
+
+    match /auditor_locations/{auditorId} {
+      allow read, write: if true;
+    }
+
+    match /test/connection {
+      allow read: if true;
+    }
+  }
+}

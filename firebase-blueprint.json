@@ -1,0 +1,93 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role and zone assignment",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["auditor", "coordinator", "admin"] },
+        "zone": { "type": "string" },
+        "photoURL": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "CNGStation": {
+      "title": "CNG Station",
+      "description": "CNG Station details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "zone": { "type": "string" },
+        "location": {
+          "type": "object",
+          "properties": {
+            "latitude": { "type": "number" },
+            "longitude": { "type": "number" }
+          }
+        },
+        "lastAuditDate": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "zone"]
+    },
+    "AuditPoint": {
+      "title": "Audit Point",
+      "description": "A specific issue or point identified during an audit",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "stationId": { "type": "string" },
+        "auditorId": { "type": "string" },
+        "category": { "type": "string", "enum": ["technical", "statutory", "safety"] },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "closed"] },
+        "remark": { "type": "string", "enum": ["pending", "dealer issue", "omc issue", "material requirement", "fabrication issue", "done"] },
+        "photoUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "closedAt": { "type": "string", "format": "date-time" },
+        "closedBy": { "type": "string" },
+        "isLeakage": { "type": "boolean" },
+        "leakageType": { "type": "string", "enum": ["gas", "oil", "none"] }
+      },
+      "required": ["id", "stationId", "auditorId", "category", "description", "status", "createdAt"]
+    },
+    "AuditorLocation": {
+      "title": "Auditor Location",
+      "description": "Real-time location of auditors",
+      "type": "object",
+      "properties": {
+        "auditorId": { "type": "string" },
+        "location": {
+          "type": "object",
+          "properties": {
+            "latitude": { "type": "number" },
+            "longitude": { "type": "number" }
+          }
+        },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["auditorId", "location", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/stations/{stationId}": {
+      "schema": "CNGStation",
+      "description": "List of CNG stations"
+    },
+    "/audit_points/{pointId}": {
+      "schema": "AuditPoint",
+      "description": "Individual audit points (open/closed)"
+    },
+    "/auditor_locations/{auditorId}": {
+      "schema": "AuditorLocation",
+      "description": "Live locations of auditors"
+    }
+  }
+}
